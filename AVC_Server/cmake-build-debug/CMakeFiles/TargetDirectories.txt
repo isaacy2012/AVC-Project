@@ -1,0 +1,3 @@
+C:/Users/Isaac Young/Documents/GitHub/AVC-Project/AVC_Server/cmake-build-debug/CMakeFiles/AVC_Server.dir
+C:/Users/Isaac Young/Documents/GitHub/AVC-Project/AVC_Server/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Isaac Young/Documents/GitHub/AVC-Project/AVC_Server/cmake-build-debug/CMakeFiles/rebuild_cache.dir

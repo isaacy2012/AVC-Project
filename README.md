@@ -47,6 +47,12 @@ Tasks:
 Due Date - 1/06/20 - 10/06/20
 Objective - Have Core and Completion done
 
+[All] - Test and debug core
+
+[All] - Test and debug completion
+
+
+
 
 
 

@@ -2,7 +2,7 @@
  Team 17 AVC Project
  
 # Timeline 
-![Timeline](readmeImages/timeline20200602.png)
+![Timeline](readmeImages/Timeline20200602.png)
 # Project Plan
  
 AVC Plan

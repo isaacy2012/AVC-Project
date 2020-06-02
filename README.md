@@ -1,27 +1,30 @@
 # AVC Project
  Team 17 AVC Project
  
- Project Plan
+# Timeline 
+![Timeline](readmeImages/timeline20200602.png)
+# Project Plan
  
 AVC Plan
-Team Name: 
-Team Members & contact info:
+## Team Name: Team 17
+## Team Members & contact info:
 Isaac - youngish@myvuw.ac.nz
 Elliot - challeelli@myvuw.ac.nz
 Paris - petikapari@myvuw.ac.nz
 Sridhar - venkatsrid@myvuw.ac.nz
-Communication tool:
+## Communication tool:
 Facebook
 Roles:
 
-Isaac - Project Manager (organising team meetings, reporting regularly on progress)
+### Isaac - Project Manager (organising team meetings, reporting regularly on progress)
 
-Elliot - Software Architect (writing core code and extending functionality)
+### Elliot - Software Architect (writing core code and extending functionality)
 
-Paris, Sridhar - Software writing, testing and documentation (debugging software and committing to git, writing test cases and documenting performance against milestones)
+### Paris, Sridhar - Software writing, testing and documentation (debugging software and committing to git, writing test cases and documenting performance against milestones)
 
 
-Github: https://github.com/isaacy2012/AVC-Project
+## Github: https://github.com/isaacy2012/AVC-Project
+
 
 1st Deadline:
 Due Date - 25/05/20 - 1/06/20

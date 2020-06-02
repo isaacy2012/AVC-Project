@@ -1,4 +1,3 @@
-
 #include "robot.hpp"
 #include <cmath>
 
@@ -8,11 +7,11 @@ struct Pixel {
 };
 
 const double WHITE_THRESH = 250;
-const int motorSpeed = 50, maxLines = 10;
+const int motorSpeed = 25, maxLines = 10;
 
 int getMotorDifference ( int xError) {
     //https://www.desmos.com/calculator/hdrl9extep
-    return 50*sin( (xError/300.0)* M_PI );
+    return 50*sin( (xError/150.0)* M_PI );
 }
 
 int main() {

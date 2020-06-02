@@ -16,6 +16,7 @@ struct ImagePPM{
 	char* data;
 } cameraView;
 
+
 // split string by delimiter
 std::vector<std::string> split (const std::string &s, char delim) {
     std::vector<std::string> result;
@@ -208,9 +209,11 @@ int takePicture(){
 	  receivePacket>>imageHeight;
 	  std::cout<<" width="<<imageWidth<<std::endl;
 	  std::cout<<" height="<<imageHeight<<std::endl;
+	  int testR = 0;
 	  for ( int row = 0 ; row < imageHeight; row++){
 		for ( int col = 0 ; col < imageWidth; col++){
 		  unsigned char r;
+		  //testR = r;
 		  receivePacket>>r;
 		  unsigned char g;
 		  receivePacket>>g;
@@ -222,6 +225,7 @@ int takePicture(){
 		  //std::cout<<"TP: "<<row<<" "<<col<<" "<<(int)r<<" "<<(int)g<<" "<<(int)b<<std::endl;
 		 }
 	  }
+	  //std::cout << "testR: " << testR << std::endl;
 	  //std::cout<<" end"<<std::endl;
 	  //SavePPMFile("i0.ppm",cameraView);
 	} //else

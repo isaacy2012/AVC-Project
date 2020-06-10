@@ -1,174 +1,68 @@
 #include "robot.hpp"
 #include <cmath>
-using std::cout;
-using std::endl;
-//Pixel
-struct Pixel {
-    unsigned char red, green, blue;
-};
+using namespace std;
 
-const double WHITE_THRESH = 250;
-<<<<<<< Updated upstream
-const int motorSpeed = 25, maxLines = 10;
+const int WHITE_THRESH = 254, RED_RATIO = 3, motorSpeed = 40, maxLines = 10, safety = 68, defaultLeft = 12;
 
 int getMotorDifference ( int xError) {
     //https://www.desmos.com/calculator/hdrl9extep
-    return 50*sin( (xError/150.0)* M_PI );
-=======
-const double RED_RATIO = 1.5;
-const int motorSpeed = 50, maxLines = 70;
-
-int getMotorDifference ( int xError) {
-    //https://www.desmos.com/calculator/hdrl9extep
-    //return 50*sin( (xError/300.0)* M_PI );
-    return 30*sin( (xError/300.0)* M_PI );
+    return (int)(60*sin( (xError/300.0)* M_PI ));
 }
 
-int averageLocOfArray ( int nums[], int size ) {
-    int total = 0;
-    for (int i = 0; i < size; i ++) {
-        if (nums[i] == 1) {
-            total = total + i;
+
+int distanceToColor( int angle, int color /*0 white 1 red*/, int max ) {
+    // gets the nearest distance to either white or red pixel for a particular angle, and a max search distance.
+    // for documentation, go to:
+    // https://github.com/isaacy2012/AVC-Project/blob/master/documentationImages/line%20saving%20function%20.png
+    for (int i = 0; i < max; i ++ ) {
+        int x = (int)(i *(double)cos( (angle)/180.0 * M_PI)), y = (int)(i * (double)sin( (angle)/180.0 * M_PI)), red = (int) get_pixel(cameraView, cameraView.height-y-3, (cameraView.width/2)+x, 0), green = (int) get_pixel(cameraView, cameraView.height-y-3, (cameraView.width/2)+x, 1), blue = (int) get_pixel(cameraView, cameraView.height-y-3, (cameraView.width/2)+x, 2);
+        if ( ((double)(red + green + blue + color*(red - green - blue)))/((double)(3+color*(green + blue - 3))) > (WHITE_THRESH-(WHITE_THRESH-RED_RATIO)*color) ) {
+            //if pixel found of that colour, return the distance to that colour.
+            return i;
         }
     }
-    return (int)((double)total/(double)size);
->>>>>>> Stashed changes
+    //if no pixel found of that colour, return -1
+    return -1;
 }
 
+
 int main() {
-    //sf::TcpSocket socket;
-    cameraView.width = 150; // 100?
-    cameraView.height = 100;
-    cameraView.data = new char[cameraView.width * cameraView.height * 3];
-    cameraView.n_bytes = cameraView.width * cameraView.height * 3;
+
+    cameraView.width = 150, cameraView.height = 100, cameraView.data = new char[cameraView.width * cameraView.height * 3], cameraView.n_bytes = cameraView.width * cameraView.height * 3;
     if (initClientRobot() != 0) {
         cout << " Error initializing robot" << endl;
     }
-    while (1) {
+    vector<int> distToFrontValues;
+    while (true) {
         takePicture();
-        //make a new array of the rows, set to the maximum number of rows we want
-        int *averageXArrayWhite = new int[maxLines], *averageXArrayRed = new int[maxLines];
-        int fullRowN = 0;
-        for (int row = 0; row < maxLines ; row++) {
-            int *rowWhites = new int[cameraView.width]; //table for storing the white pixels in each row
-            int *rowReds = new int[cameraView.width]; //table for storing the red pixels in each row
-            //set the whole row to no whites.
-            for (int rowWhite = 0; rowWhite < cameraView.width; rowWhite++) {
-                rowWhites[rowWhite] = 0, rowReds[rowWhite] = 0;
-            }
-            //in each column (for each pixel * )
-            for (int column = 0; column < cameraView.width; column++) {
-                //mark another pixel
-                bool isWhite = false;
-                bool isRed = false;
-                //get the luminance from get_pixel, getting the maxLines rows closest to the robot.
-                int luminance = (int) get_pixel(cameraView, cameraView.height-row, column, 3);
-
-                //if the pixel is white
-                if (luminance > WHITE_THRESH) {
-                    //mark that pixel as white
-                    isWhite = true;
-                }
-                if (isWhite == true) {
-                    rowWhites[column] = 1;
-                }
-                if (isRed == true) {//&& (column < cameraView.width-30)) {
-                    rowReds[column] = 1;
-                }
-            }
-            //get average of rowWhites
-            int counterWhite = 0, totalRowWhite = 0, counterRed = 0, totalRowRed = 0;
-            for (int i = 0; i < cameraView.width; i++) {
-                if (rowWhites[i] == 1) {
-                    counterWhite = counterWhite + i, totalRowWhite = totalRowWhite + 1;
-                }
-                if (rowReds[i] == 1) {
-                    counterRed = counterRed + i, totalRowRed = totalRowRed + 1;
-                }
-                if ((i > cameraView.width/2) && (row>maxLines-10) && (rowReds[i] == 1)) {
-                    fullRowN =  fullRowN + 1;
-                }
-            }
-            if (counterWhite > 2) {
-                averageXArrayWhite[row] = (counterWhite / totalRowWhite);
-            } else {
-                averageXArrayWhite[row] = -1;
-            }
-            if (counterRed > 2) {
-                averageXArrayRed[row] = (counterRed / totalRowRed);
-            } else {
-                averageXArrayRed[row] = -1;
-            }
-        }
-        int *angles = new int[90];
-        int angleCounter = 0;
-        for (int i = 45; i < 135; i++ ) {
-            //get the colors from get_pixel;
-            int radius = 30;
-            int x = radius*cos( i/180.0 * M_PI);
-            int y = radius*sin( i/180.0 * M_PI);
-            int red = (int) get_pixel(cameraView, cameraView.height-y, (cameraView.width/2)+x, 0);
-            int green = (int) get_pixel(cameraView, cameraView.height-y, (cameraView.width/2)+x, 1);
-            int blue = (int) get_pixel(cameraView, cameraView.height-y, (cameraView.width/2)+x, 2);
-            //cout << "red: " << red << "green: " << green << "blue: " << blue << endl;
-            if ((double)red/(double)(green+blue)/2 > RED_RATIO) {
-                angleCounter = angleCounter +1;
-                angles[i] = 1;
-            }
-        }
-        int aError;
-        if (angleCounter == 0) {
-            aError = -91;
+        int motorDifference = 0, distToFront = distanceToColor(90, 1, 40), distToLeft = distanceToColor(180, 1, (int)(cameraView.width/2.0)), distToRight = distanceToColor( 0, 1, 50), distToWhite = distanceToColor(90, 0, 10);
+        distToFrontValues.push_back(distToFront);
+        if (distToLeft > -1 ) {
+            motorDifference = getMotorDifference(safety - distToLeft);
         } else {
-            aError = averageLocOfArray(angles, 90)-90;
+            motorDifference = getMotorDifference(-defaultLeft);
         }
-        //add up all of the -'s and get the average x value
-        /*
-        int counterWhite = 0;
-        int totalWhite = 0;
-        for (int i = 0; i < maxLines; i++) {
-            if (averageXArrayWhite[i] != -1) {
-                counterWhite = counterWhite + averageXArrayWhite[i];
-                totalWhite = totalWhite+1;
+        if (distToFrontValues[distToFrontValues.size()-2] > distToFront && distToFront > -1) {
+            //impedance from the front
+            motorDifference = motorDifference+(int)(90-distToFront);
+        } else {
+            //nothing impeding from the front
+        }
+        int avgX = -1, xTotal = 0, counter = 0;
+        for (int i = 0; i < maxLines; i++ ) {
+            for (int j = 0; j < cameraView.width; j ++ ) {
+                if ((int) get_pixel(cameraView, cameraView.height-i, j, 3) > WHITE_THRESH) {
+                    xTotal = xTotal+j, counter = counter+1;//yTotal = yTotal+j, counter = counter+1;
+                }
             }
         }
-        int counterRed = 0;
-        int totalRed = 0;
-        for (int i = 0; i < maxLines; i++) {
-            if (averageXArrayRed[i] != -1) {
-                counterRed = counterRed + averageXArrayRed[i];
-                totalRed = totalRed+1;
-            }
+        if (counter > 10) {
+            avgX = xTotal/counter; //, avgY = yTotal/counter
+            motorDifference = getMotorDifference( avgX - cameraView.width/2);
+        } else if (motorDifference == 0 && distToLeft == -1 && distToRight == -1 ) {
+            motorDifference = getMotorDifference(-cameraView.width);
         }
-
-
-        //int averageX = (counter / cameraView.height);
-        int averageXWhite = (counterWhite / totalWhite);
-        int averageXRed = (counterRed / totalRed);
-         */
-        //get the motorDifference from the function
-        int motorDifference;
-        cout << aError << endl;
-        if (aError == -91) {
-            motorDifference = 15;
-            0;
-        } else {
-            motorDifference = getMotorDifference(aError);
-        }
-        /*
-        if (totalWhite > 3) {
-            motorDifference = getMotorDifference(averageXWhite - cameraView.width / 2);
-        } else if (fullRowN  > (cameraView.width/2)-20 ) {
-            cout << "FULLROW" << endl;
-            motorDifference = 15;
-        } else if  (totalRed > 3) {
-            motorDifference = getMotorDifference( averageXRed - 30 );
-        } else {
-            motorDifference = -2;
-        }
-         */
-        //set the motor speeds to the base speed +- the motorDifference
-        double vLeft = motorSpeed+motorDifference, vRight = motorSpeed-motorDifference;
+        int vLeft = motorSpeed+motorDifference, vRight = motorSpeed-motorDifference;
         setMotors(vLeft, vRight);
         usleep(500);
     } //while

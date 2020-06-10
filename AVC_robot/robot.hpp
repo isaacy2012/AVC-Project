@@ -207,8 +207,8 @@ int takePicture(){
 	  receivePacket>>imageWidth;
 	  int imageHeight;
 	  receivePacket>>imageHeight;
-	  std::cout<<" width="<<imageWidth<<std::endl;
-	  std::cout<<" height="<<imageHeight<<std::endl;
+	  //std::cout<<" width="<<imageWidth<<std::endl;
+	  //std::cout<<" height="<<imageHeight<<std::endl;
 	  int testR = 0;
 	  for ( int row = 0 ; row < imageHeight; row++){
 		for ( int col = 0 ; col < imageWidth; col++){

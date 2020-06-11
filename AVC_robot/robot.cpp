@@ -9,22 +9,15 @@ int getMotorDifference ( int xError) {
     return (int)(60*sin( (xError/300.0)* M_PI ));
 }
 
-
-int distanceToColor( int angle, int color /*0 white 1 red*/, int max ) {
-    // gets the nearest distance to either white or red pixel for a particular angle, and a max search distance.
-    // for documentation, go to:
-    // https://github.com/isaacy2012/AVC-Project/blob/master/documentationImages/line%20saving%20function%20.png
+int distanceToColor( int angle, int max ) {
     for (int i = 0; i < max; i ++ ) {
         int x = (int)(i *(double)cos( (angle)/180.0 * M_PI)), y = (int)(i * (double)sin( (angle)/180.0 * M_PI)), red = (int) get_pixel(cameraView, cameraView.height-y-3, (cameraView.width/2)+x, 0), green = (int) get_pixel(cameraView, cameraView.height-y-3, (cameraView.width/2)+x, 1), blue = (int) get_pixel(cameraView, cameraView.height-y-3, (cameraView.width/2)+x, 2);
-        if ( ((double)(red + green + blue + color*(red - green - blue)))/((double)(3+color*(green + blue - 3))) > (WHITE_THRESH-(WHITE_THRESH-RED_RATIO)*color) ) {
-            //if pixel found of that colour, return the distance to that colour.
+        if ( ((double)(2.0*red/((double)(green + blue))) > (RED_RATIO) )) {
             return i;
         }
     }
-    //if no pixel found of that colour, return -1
     return -1;
 }
-
 
 int main() {
 
@@ -35,7 +28,7 @@ int main() {
     vector<int> distToFrontValues;
     while (true) {
         takePicture();
-        int motorDifference = 0, distToFront = distanceToColor(90, 1, 40), distToLeft = distanceToColor(180, 1, (int)(cameraView.width/2.0)), distToRight = distanceToColor( 0, 1, 50), distToWhite = distanceToColor(90, 0, 10);
+        int motorDifference = 0, distToFront = distanceToColor(90, 40), distToLeft = distanceToColor(180, (int)(cameraView.width/2.0)), distToRight = distanceToColor( 0,50);
         distToFrontValues.push_back(distToFront);
         if (distToLeft > -1 ) {
             motorDifference = getMotorDifference(safety - distToLeft);

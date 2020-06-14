@@ -53,7 +53,10 @@ int main() {
         //start the motorDifference at 0 (going straight ahead)
         int motorDifference = 0;
         //create the TripleDist of distances on the left, front, and right respectively.
-        TripleDist distances{distanceToColor( 180, (int)(cameraView.width/2.0)), distanceToColor(90,40), distanceToColor( 0, 50 )};
+        TripleDist distances;
+        distances.left = distanceToColor( 180, (int)(cameraView.width/2.0));
+        distances.front = distanceToColor(90,40);
+        distances.right = distanceToColor( 0, 50 );
         //if there's something to the left, suggest that the bot moves right
         if (distances.left > -1 ) {
             motorDifference = getMotorDifference(safety - distances.left);

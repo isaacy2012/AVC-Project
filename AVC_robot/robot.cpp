@@ -50,9 +50,10 @@ int main() {
     int redMode = 0, previousDistToFront = -1 ;
     while (true) {
         takePicture();
+        //start the motorDifference at 0 (going straight ahead)
         int motorDifference = 0;
-        TripleDist distances{};
-        distances.front = distanceToColor(90,40), distances.left = distanceToColor( 180, (int)(cameraView.width/2.0)), distances.right = distanceToColor( 0,50);
+        //create the TripleDist of distances on the left, front, and right respectively.
+        TripleDist distances{distanceToColor( 180, (int)(cameraView.width/2.0)), distanceToColor(90,40), distanceToColor( 0, 50 )};
         //if there's something to the left, suggest that the bot moves right
         if (distances.left > -1 ) {
             motorDifference = getMotorDifference(safety - distances.left);
@@ -75,14 +76,13 @@ int main() {
                 }
             }
         }
-        //cout << "Left: " << distances.left << " Right: " << distances.right << " Motor: " << motorDifference << endl
         //if there is a significant number of white pixels, follow the white line
         if (counter > 10) {
             //-1 is so that if it's equal on both sides, it will always go left
             avgX = xTotal/counter, motorDifference = getMotorDifference( avgX - cameraView.width/2 -1);
         } else if (motorDifference == getMotorDifference(-defaultLeft) && distances.left == -1 && distances.right == -1 && redMode == 0 ) {
             //if redmode is off and there's no other stuff to guide the bot, spin around quickly since that's a dead end
-            motorDifference = getMotorDifference(-cameraView.width);
+            motorDifference = -60;
         }
         //set the previous distance to front for next time around the while loop.
         previousDistToFront = distances.front;

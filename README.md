@@ -52,6 +52,11 @@ Objective - Have Core and Completion done
 [All] - Test and debug completion
 
 
+3rd Deadline - 10/06/20 - 17/06/20
+
+[All] - Test and Debug Challenge
+
+
 
 
 

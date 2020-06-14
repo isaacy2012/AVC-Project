@@ -1,17 +1,28 @@
 #include "robot.hpp"
 #include <cmath>
 
-const int WHITE_THRESH = 254, RED_RATIO = 3, motorSpeed = 40, maxLines = 10, safety = 68, defaultLeft = 12;
+const int WHITE_THRESH = 254, BLACK_THRESH = 1, RED_RATIO = 3, motorSpeed = 40, maxLines = 15, safety = 68, defaultLeft = 18, blackDist = 30;
 
 struct TripleDist {
     int left, front, right;
 };
 
 int getMotorDifference ( int xError) {
-    //https://www.desmos.com/calculator/xsjgpwoe0c
-    return (int)(60*sin( (xError/300.0)* M_PI ));
+    //https://www.desmos.com/calculator/elxqlz5fub
+    return (int)(40*sin( (xError/300.0)* M_PI ));
 }
 
+bool blackInFront() {
+    //count i until a black pixel is found
+    for (int i = 0; i < blackDist; i++ ) {
+        if ( (int) get_pixel(cameraView, cameraView.height-i-3, (cameraView.width/2), 3) < BLACK_THRESH ) {
+            //if a black pixel is found ( at the flag ) within the blackDist, return true
+            return true;
+        }
+    }
+    //if no black pixel found ( not at the flag yet ), return false
+    return false;
+}
 int distanceToColor( int angle, int max ) {
     //count i until red pixel is found
     for (int i = 0; i < max; i ++ ) {
@@ -40,7 +51,7 @@ int main() {
     while (true) {
         takePicture();
         int motorDifference = 0;
-        TripleDist distances;
+        TripleDist distances{};
         distances.front = distanceToColor(90,40), distances.left = distanceToColor( 180, (int)(cameraView.width/2.0)), distances.right = distanceToColor( 0,50);
         //if there's something to the left, suggest that the bot moves right
         if (distances.left > -1 ) {
@@ -75,6 +86,13 @@ int main() {
         }
         //set the previous distance to front for next time around the while loop.
         previousDistToFront = distances.front;
+        //if we have reached the chequered flag (i.e black pixel in front)
+        if (blackInFront() == true ) {
+            //stop the bot
+            setMotors(0, 0);
+            //stop the while loop
+            break;
+        }
         //set the motor velocities.
         setMotors(motorSpeed+motorDifference, motorSpeed-motorDifference);
         usleep(500);

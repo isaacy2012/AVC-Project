@@ -1,103 +1,81 @@
+
 #include "robot.hpp"
 #include <cmath>
 
-const int WHITE_THRESH = 254, BLACK_THRESH = 1, RED_RATIO = 3, motorSpeed = 40, maxLines = 15, safety = 68, defaultLeft = 18, blackDist = 30;
-
-struct TripleDist {
-    int left, front, right;
+//Pixel
+struct Pixel {
+    unsigned char red, green, blue;
 };
 
-int getMotorDifference ( int xError) {
-    //https://www.desmos.com/calculator/elxqlz5fub
-    return (int)(40*sin( (xError/300.0)* M_PI ));
-}
+const double WHITE_THRESH = 250;
+const int motorSpeed = 20, maxLines = 10;
 
-bool blackInFront() {
-    //count i until a black pixel is found
-    for (int i = 0; i < blackDist; i++ ) {
-        if ( (int) get_pixel(cameraView, cameraView.height-i-3, (cameraView.width/2), 3) < BLACK_THRESH ) {
-            //if a black pixel is found ( at the flag ) within the blackDist, return true
-            return true;
-        }
-    }
-    //if no black pixel found ( not at the flag yet ), return false
-    return false;
-}
-int distanceToColor( int angle, int max ) {
-    //count i until red pixel is found
-    for (int i = 0; i < max; i ++ ) {
-        //go in a straight line from origin (+3 in y axis to account for edge of camera)
-        int x = (int)(i *(double)cos( (angle)/180.0 * M_PI)), y = (int)(i * (double)sin( (angle)/180.0 * M_PI));
-        int red = (int) get_pixel(cameraView, cameraView.height-y-3, (cameraView.width/2)+x, 0);
-        int green = (int) get_pixel(cameraView, cameraView.height-y-3, (cameraView.width/2)+x, 1);
-        int blue = (int) get_pixel(cameraView, cameraView.height-y-3, (cameraView.width/2)+x, 2);
-        if ( ((double)(2.0*red/((double)(green + blue))) > (RED_RATIO) )) {
-            //once it's found a red pixel, return how far we had to go along that line in terms of i
-            return i;
-        }
-    }
-    //if no red pixels found, return -1
-    return -1;
+int getMotorDifference ( int xError) {
+    //https://www.desmos.com/calculator/hdrl9extep
+    return 50*sin( (xError/300.0)* M_PI );
 }
 
 int main() {
-
-    //camera initialisation
-    cameraView.width = 150, cameraView.height = 100, cameraView.data = new char[cameraView.width * cameraView.height * 3], cameraView.n_bytes = cameraView.width * cameraView.height * 3;
+    //sf::TcpSocket socket;
+    cameraView.width = 150; // 100?
+    cameraView.height = 100;
+    cameraView.data = new char[cameraView.width * cameraView.height * 3];
+    cameraView.n_bytes = cameraView.width * cameraView.height * 3;
     if (initClientRobot() != 0) {
         std::cout << " Error initializing robot" << std::endl;
     }
-    int redMode = 0, previousDistToFront = -1 ;
-    while (true) {
+    while (1) {
         takePicture();
-        //start the motorDifference at 0 (going straight ahead)
-        int motorDifference = 0;
-        //create the TripleDist of distances on the left, front, and right respectively.
-        TripleDist distances;
-        distances.left = distanceToColor( 180, (int)(cameraView.width/2.0));
-        distances.front = distanceToColor(90,40);
-        distances.right = distanceToColor( 0, 50 );
-        //if there's something to the left, suggest that the bot moves right
-        if (distances.left > -1 ) {
-            motorDifference = getMotorDifference(safety - distances.left);
-        } else {
-            //if there's nothing to the left, bot go left by default slowly (full turn)
-            motorDifference = getMotorDifference(-defaultLeft);
-        }
-
-        // if impedance from the front
-        if (distances.front < previousDistToFront && distances.front > -1 ) {
-            motorDifference = motorDifference+(int)(90-distances.front), redMode = 1;
-        }
-
-        //finding average x of white pixels
-        int avgX = -1, xTotal = 0, counter = 0;
-        for (int i = 0; i < maxLines; i++ ) {
-            for (int j = 0; j < cameraView.width; j ++ ) {
-                if ((int) get_pixel(cameraView, cameraView.height-i, j, 3) > WHITE_THRESH) {
-                    xTotal = xTotal+j, counter = counter+1;
+        //make a new array of the rows, set to the maximum number of rows we want
+        int *averageXArray = new int[maxLines];
+        for (int row = 0; row < maxLines ; row++) {
+            int *rowWhites = new int[cameraView.width]; //table for storing the white pixels in each row
+            //set the whole row to no whites.
+            for (int rowWhite = 0; rowWhite < cameraView.width; rowWhite++) {
+                rowWhites[rowWhite] = 0;
+            }
+            //in each column (for each pixel * )
+            for (int column = 0; column < cameraView.width; column++) {
+                //mark another pixel
+                bool isWhite = false;
+                //get the luminance from get_pixel, getting the maxLines rows closest to the robot.
+                int luminance = (int) get_pixel(cameraView, cameraView.height-row, column, 3);
+                //if the pixel is white
+                if (luminance > WHITE_THRESH) {
+                    //mark that pixel as white
+                    isWhite = true;
+                }
+                if (isWhite == true) {
+                    rowWhites[column] = 1;
                 }
             }
+            //get average of rowWhites
+            int counter = 0, totalRow = 0;
+            for (int i = 0; i < cameraView.width; i++) {
+                if (rowWhites[i] == 1) {
+                    counter = counter + i, totalRow = totalRow + 1;
+                }
+            }
+            if (counter > 2) {
+                averageXArray[row] = (counter / totalRow);
+            } else {
+                averageXArray[row] = -1;
+            }
         }
-        //if there is a significant number of white pixels, follow the white line
-        if (counter > 10) {
-            //-1 is so that if it's equal on both sides, it will always go left
-            avgX = xTotal/counter, motorDifference = getMotorDifference( avgX - cameraView.width/2 -1);
-        } else if (motorDifference == getMotorDifference(-defaultLeft) && distances.left == -1 && distances.right == -1 && redMode == 0 ) {
-            //if redmode is off and there's no other stuff to guide the bot, spin around quickly since that's a dead end
-            motorDifference = -60;
+        //add up all of the -'s and get the average x value
+        int counter = 0;
+        for (int i = 0; i < maxLines; i++) {
+            if (averageXArray[i] != -1) {
+                counter = counter + averageXArray[i];
+            }
         }
-        //set the previous distance to front for next time around the while loop.
-        previousDistToFront = distances.front;
-        //if we have reached the chequered flag (i.e black pixel in front)
-        if (blackInFront() == true ) {
-            //stop the bot
-            setMotors(0, 0);
-            //stop the while loop
-            break;
-        }
-        //set the motor velocities.
-        setMotors(motorSpeed+motorDifference, motorSpeed-motorDifference);
+        //int averageX = (counter / cameraView.height);
+        int averageX = (counter / maxLines);
+        //get the motorDifference from the function
+        int motorDifference = getMotorDifference( averageX - cameraView.width/2 );
+        //set the motor speeds to the base speed +- the motorDifference
+        double vLeft = motorSpeed+motorDifference, vRight = motorSpeed-motorDifference;
+        setMotors(vLeft, vRight);
         usleep(500);
     } //while
 } // main

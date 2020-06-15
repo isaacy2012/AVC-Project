@@ -1,6 +1,6 @@
-DIR = C:\\SFML
-CFLAGS = -I ${DIR}\include 
-LFLAGS = -L ${DIR}\lib 
+SFML = /home/username/SFML
+CFLAGS = -I ${SFML}/include 
+LFLAGS = -L ${SFML}/lib -Wl,-R ${SFML}/lib 
 LIBS = -lsfml-window  -lsfml-graphics -lsfml-system -lsfml-network 
 server3: server3.o 
 	g++ $(LFLAGS) -o server3 server3.o ${LIBS} 

@@ -60,7 +60,7 @@ Objective - Have Core and Completion done
 
 See below for installation instructions for a system running Linux.
 
-###Prerequisites
+### Prerequisites
 The code relys on the SFML library to function.
 
 Firstly, download the linux version of [SFML from here](https://www.sfml-dev.org/download/sfml/2.5.1/). Please note this is for a 64 bit system, for a 32 bit system you must compile from source (instructions available on the sfml website).
@@ -78,7 +78,7 @@ The next step is to download the contents of the repo. Use the download zip butt
 
 Extract this to a destination of your choice.
 
-###Editing makefiles
+### Editing makefiles
 The next step is to edit the provided makefiles to make the compile based on your specific system. The first makefile to edit is located in the AVC_robot folder. Simply open this file with a text editor of your choice, and follow the below steps.
 
 ![Makefile Robot](https://i.imgur.com/Px9B25b.png "Makefile Robot")
@@ -87,8 +87,8 @@ The first line should point to your SFML installation. Assuming you installed it
 
 The second makefile to edit is located in the AVC_server folder. Simply open this file with a text editor of your choice, and follow the below steps. Make the same change to the first line as described before. Save the file.
 
-###Compiling the code
+### Compiling the code
 The next step is to compile the code. Open a terminal in the AVC_robot folder, and type the command "make" (without quotes). This should compile and build without problems if you followed the previous steps correctly. Then open a terminal in the AVC_server folder, and type the command "make" (without quotes) again.
 
-###Running the code
+### Running the code
 Simply open a terminal in the AVC_server folder and type "./server3" (without quotes) to run the server. Then open a terminal in the AVC_robot folder and type "./robot" (without quotes) to run the robot code.

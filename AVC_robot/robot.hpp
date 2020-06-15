@@ -16,7 +16,6 @@ struct ImagePPM{
 	char* data;
 } cameraView;
 
-
 // split string by delimiter
 std::vector<std::string> split (const std::string &s, char delim) {
     std::vector<std::string> result;
@@ -74,7 +73,7 @@ int initClientRobot(){
 }
 
 // returns color component (color==0 -red,color==1-green,color==2-blue
-// color == 3 - luminosity
+// color == 3 - luminocity
 // for pixel located at (row,column)
 unsigned char get_pixel( ImagePPM image,int row,int col, int color)
 {
@@ -167,17 +166,17 @@ int OpenPPMFile(std::string filename,ImagePPM& image){
 
 /**********NETWORK****/
 
-sf::TcpSocket socket2;
+sf::TcpSocket socket;
 sf::Packet packet;
 
 int connectNetwork(){
-
-   sf::Socket::Status status = socket2.connect("127.0.0.1", 53000);
+   
+   sf::Socket::Status status = socket.connect("127.0.0.1", 53000);
    if (status != sf::Socket::Done)  {
-       std::cout<<"Error socket2"<<std::endl;
+       std::cout<<"Error socket"<<std::endl;
        return -1;
    }
-   //socket2.setBlocking(0);
+   //socket.setBlocking(0);
    return 0;
 }
 
@@ -191,14 +190,14 @@ int takePicture(){
     double value3 = 0.0;
     // fill the packet
 	packet<<command<<text<<value<<value1<<value2<<value3;
-    if (socket2.send(packet) != sf::Socket::Done)  {
+    if (socket.send(packet) != sf::Socket::Done)  {
           std::cout<<" Error sending"<<std::endl;
     } else {
 	  // std::cout<<" Send OK"<<std::endl;
 	}
-
+	
 	sf::Packet receivePacket;
-    if (socket2.receive(receivePacket) != sf::Socket::Done){ // non blocking
+    if (socket.receive(receivePacket) != sf::Socket::Done){ // non blocking
            std::cout<<" Nothing received"<<std::endl;
           return -1;
     } else {
@@ -209,11 +208,9 @@ int takePicture(){
 	  receivePacket>>imageHeight;
 	  std::cout<<" width="<<imageWidth<<std::endl;
 	  std::cout<<" height="<<imageHeight<<std::endl;
-	  int testR = 0;
 	  for ( int row = 0 ; row < imageHeight; row++){
 		for ( int col = 0 ; col < imageWidth; col++){
 		  unsigned char r;
-		  //testR = r;
 		  receivePacket>>r;
 		  unsigned char g;
 		  receivePacket>>g;
@@ -221,11 +218,10 @@ int takePicture(){
 		  receivePacket>>b;
 		  if ( set_pixel(cameraView,row,col,r,g,b) != 0 ){
 				  return -1;
-		  };
+		  };	
 		  //std::cout<<"TP: "<<row<<" "<<col<<" "<<(int)r<<" "<<(int)g<<" "<<(int)b<<std::endl;
 		 }
 	  }
-	  //std::cout << "testR: " << testR << std::endl;
 	  //std::cout<<" end"<<std::endl;
 	  //SavePPMFile("i0.ppm",cameraView);
 	} //else
@@ -243,7 +239,7 @@ int setMotors(double vLeft, double vRight){
     // fill the packet
     packet.clear();
 	packet<<command<<text<<value<<value1<<value2<<value3;
-    if (socket2.send(packet) != sf::Socket::Done)  {
+    if (socket.send(packet) != sf::Socket::Done)  {
          std::cout<<" Error sending"<<std::endl;
     } 
 

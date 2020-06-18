@@ -74,7 +74,7 @@ int main() {
         int avgX = -1, xTotal = 0, counter = 0;
         for (int i = 0; i < maxLines; i++ ) {
             for (int j = 0; j < cameraView.width; j ++ ) {
-                if ((int) get_pixel(cameraView, cameraView.height-i, j, 3) > WHITE_THRESH) {
+                if ((int) get_pixel(cameraView, cameraView.height - i - 1 , j, 3) > WHITE_THRESH) {
                     xTotal = xTotal+j, counter = counter+1;
                 }
             }

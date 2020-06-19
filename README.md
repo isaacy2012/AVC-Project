@@ -61,6 +61,8 @@ Objective - Have Core and Completion done
 See below for installation instructions for a system running Linux.
 
 ### Prerequisites
+Firstly, in order to compile the code ensure that your system has a version of the g++ compiler installed, most popular distros should include this by default (e.g ubunutu).
+
 The code relys on the SFML library to function.
 
 Firstly, download the linux version of [SFML from here](https://www.sfml-dev.org/download/sfml/2.5.1/). Please note this is for a 64 bit system, for a 32 bit system you must compile from source (instructions available on the sfml website).
